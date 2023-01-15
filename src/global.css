@@ -8,7 +8,8 @@ html, body {
     padding: 0;
     margin: 0;
     font-family: 'Lato', sans-serif;
-    color: #333e48;
+    color: #FFFFFF;
+    background-color: #000000;
 }
 * {
     box-sizing: border-box;

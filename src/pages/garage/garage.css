@@ -1,0 +1,69 @@
+.garage {
+    width: 100%;
+    padding-left: 40px;
+}
+
+.create,
+.update {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.create__button,
+.update__button {
+    width: 80px;
+    height: 20px;
+    border: 2px solid #FFFFFF;
+    background-color: transparent;
+    color: #FFFFFF;
+    font-size: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+input[type='text'] {
+    outline: none;
+    margin-right: 10px;
+}
+
+input[type='color'] {
+    width: 80px;
+    height: 20px;
+    margin-right: 10px;
+}
+.garage__buttons {
+    margin-top: 20px;
+}
+
+.garage__button {
+    border: 2px solid #FFFFFF;
+    background-color: transparent;
+    color: #FFFFFF;
+    font-size: 12px;
+    margin-right: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-bottom: 50px;
+}
+
+.button_race,
+.button_reset {
+    width: 90px;
+    height: 30px;
+}
+
+.button_generate {
+    width: 150px;
+    height: 30px;
+}
+
+.garage__counter {
+    display: flex;
+    margin-bottom: 10px;
+    gap: 5px;
+}
+
+.garage__number {
+    font-size: 20px;
+}
