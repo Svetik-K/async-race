@@ -1,5 +1,7 @@
 import Header from '../../components/header/header';
+import Car from '../../components/car/car';
 import './garage.css';
+
 class GaragePage {
     container: HTMLElement;
     header: Header;
@@ -100,6 +102,24 @@ class GaragePage {
         pageNumber.textContent = '';
         pageCounter.append(pageNumber);
 
+        for(let i = 0; i < 7; i++) {
+            const randomCar = new Car();
+            this.container.append(randomCar.draw());
+        }
+
+        const paginationButtons = document.createElement('div');
+        paginationButtons.className = 'garage__pagination-buttons pagination';
+        this.container.append(paginationButtons);
+
+        const prevButton = document.createElement('button');
+        prevButton.className = 'pagination__button button_prev';
+        prevButton.textContent = 'Prev';
+        paginationButtons.append(prevButton);
+
+        const nextButton = document.createElement('button');
+        nextButton.className = 'pagination__button button_next';
+        nextButton.textContent = 'Next';
+        paginationButtons.append(nextButton);
 
         return this.container;
     }

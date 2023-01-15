@@ -1,7 +1,7 @@
 .header {
     width: 100%;
     display: flex;
-    padding: 30px 40px;
+    padding: 30px 20px;
 }
 
 .header__button {
