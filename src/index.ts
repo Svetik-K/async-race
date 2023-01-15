@@ -1,1 +1,4 @@
-console.log("Hello World!");
+import App from './pages/app/app';
+
+const app = new App();
+app.start();
