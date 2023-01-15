@@ -1,0 +1,17 @@
+.header {
+    width: 100%;
+    display: flex;
+    padding: 10px 40px;
+}
+
+.header__button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80px;
+    height: 20px;
+    text-decoration: none;
+    border: 1px solid #000;
+    color: #000;
+    margin-right: 20px;
+}

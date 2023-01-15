@@ -1,22 +1,18 @@
-import {getCars, getCar} from '../../utils/api';
+import Header from '../../components/header/header';
 
 class App {
+    private static container: HTMLElement = document.body;
+    header: Header;
 
-    constructor() {}
+    constructor() {
+        this.header = new Header();
+        // this.content = document.createElement('div');
+        // this.content.className = 'content';
+    }
 
     start() {
-
+        this.header.draw();
     }
 }
 
 export default App;
-
-
-// getCar(2);
-
-// const main = async() => {
-//     const cars = await getCars([{key: '_page', value: '0'}, {key: '_limit', value: '3'}]);
-//     console.log(cars);
-// }
-
-// main();
