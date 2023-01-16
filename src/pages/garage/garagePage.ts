@@ -1,7 +1,7 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
 import { createRandomColor, createCarName } from '../../utils/helpFuncs';
-import { generateQueryParams, createCar, getCars} from '../../utils/api';
+import { createCar, getCars } from '../../utils/api';
 import './garage.css';
 
 class GaragePage {
@@ -93,6 +93,19 @@ class GaragePage {
                 currentPage.textContent = `${pageToDraw}`;
             });
         });
+    }
+    
+    private addOneCar() {
+        const nameInput = <HTMLInputElement>document.querySelector('.create__name');
+        const carName = nameInput.value;
+        const colorInput = <HTMLInputElement>document.querySelector('.create__color');
+        const carColor = colorInput.value;
+        if(carName === '' || carColor === '#000000') {
+            return;
+        }
+        const car: Car = new Car(carName, carColor);
+        createCar(car);
+        this.cars.append(car.draw());
     }
 
     draw() {
@@ -200,6 +213,11 @@ class GaragePage {
             e.preventDefault();
             this.generate100Cars();
             carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 100})`;
+        })
+
+        createButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.addOneCar();
         })
 
         return this.container;
