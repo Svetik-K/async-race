@@ -1,4 +1,4 @@
-import Garagepage from '../garage/garagePage';
+import GaragePage from '../garage/garagePage';
 import WinnersPage from '../winners/winnersPage';
 
 class App {
@@ -10,10 +10,10 @@ class App {
 
     renderNewPage(idPage: string) {
         this.container.innerHTML = '';
-        let page = null;
+        let page: GaragePage | WinnersPage | null = null;
 
         if (idPage === 'garage') {
-            page = new Garagepage();
+            page = new GaragePage();
         }
         else if (idPage === 'winners') {
             page = new WinnersPage();

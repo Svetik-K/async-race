@@ -1,6 +1,20 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
+import { createRandomColor, createCarName } from '../../utils/helpFuncs';
 import './garage.css';
+
+const mainUrl = 'http://127.0.0.1:3000';
+const paths = {
+    cars: '/garage',
+    winners: '/winners'
+}
+
+type Param = { [key: string]: string}
+type CarModel = {
+    name: string,
+    color: string,
+    id?: number
+}
 
 class GaragePage {
     container: HTMLElement;
@@ -11,6 +25,42 @@ class GaragePage {
         this.container.className = 'garage';
         this.header = new Header();
     }
+
+    private generateQueryParams = (params: Param[] = []) => {
+        return params ? `?${params.map((param) => `${param.key}=${param.value}`).join('&')}` : '';
+    }
+
+    private getCars = async(queryParams: Param[] = []) => {
+        const response = await fetch(`${mainUrl}${paths.cars}${this.generateQueryParams(queryParams)}`);
+        const cars: CarModel[] = await response.json();
+        const count = Number(response.headers.get('X-Total-Count'));
+
+        return { cars, count };
+    }
+
+    private createCar = async(body: { name: string, color: string }) => {
+        const response = await fetch(`${mainUrl}${paths.cars}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+        const newCar = await response.json();
+    
+        return newCar;
+    }
+
+    private generate100Cars() {
+        for(let i = 0; i < 100; i++) {
+            const carName = createCarName();
+            const carColor = createRandomColor();
+            const car: Car = new Car(carName, carColor);
+            this.createCar(car);
+            this.container.append(car.draw());
+        }
+    }
+
 
     draw() {
         this.header.draw();
@@ -102,10 +152,14 @@ class GaragePage {
         pageNumber.textContent = '';
         pageCounter.append(pageNumber);
 
-        for(let i = 0; i < 7; i++) {
-            const randomCar = new Car();
-            this.container.append(randomCar.draw());
-        }
+        this.getCars().then((data) => {
+            data.cars.forEach((car) => {
+                const garageCar = new Car(car.name, car.color, car.id);
+                this.container.append(garageCar.draw());
+            });
+            carsNumber.textContent = `(${data.cars.length})`;
+            console.log(data.cars)
+        });
 
         const paginationButtons = document.createElement('div');
         paginationButtons.className = 'garage__pagination-buttons pagination';
@@ -120,6 +174,12 @@ class GaragePage {
         nextButton.className = 'pagination__button button_next';
         nextButton.textContent = 'Next';
         paginationButtons.append(nextButton);
+
+        generateButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.generate100Cars();
+            carsNumber.textContent = `${Number(carsNumber.textContent) + 100}`;
+        })
 
         return this.container;
     }

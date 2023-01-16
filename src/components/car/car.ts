@@ -2,30 +2,19 @@ import './car.css';
 
 class Car {
     container: HTMLDivElement;
+    name: string;
+    color: string;
+    id?: number;
 
-    constructor() {
+    constructor(name: string, color: string, id?: number) {
         this.container = document.createElement('div');
         this.container.className = 'car-item';
+        this.name = name;
+        this.color = color;
+        this.id = id;
     }
 
-    createRandomColor() {
-        const hexValues = [0,1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F'];
-        let hex = '#';
-        for(let i = 0; i < 6; i++){
-            const index = Math.floor(Math.random() * hexValues.length)
-            hex += hexValues[index];
-        }
-        return hex;
-    }
-
-    createCarName() {
-        const firstNames = ['Ford', 'Fiat', 'Honda', 'Isuzu', 'BMW', 'Kia', 'Mercedes', 'Mitsubishi', 'Mazda', 'Nissan', 'Opel', 'Porsche', 'Audi', 'Renault', 'Saab', 'SEAT', 'Skoda', 'Subaru', 'Volvo', 'Toyota'];
-        const secondName = ['Integra', 'MDX', 'A3', 'Sorento', 'Encore', 'Escalade', 'Blazer', 'Charger', '500X', 'Bronco', 'Escape', 'Transit', 'G80', 'Canyon', 'Yukon', 'Pilot', 'Palisade', 'Compass', 'Carnival', 'Discovery'];
-        const randomName = `${firstNames[Math.floor(Math.random() * 20)]} ${secondName[Math.floor(Math.random() * 20)]}`;
-        return randomName;
-    }
-
-    createCarImage() {
+    createCarImage(color: string) {
         const carImage = document.createElement('div');
         carImage.className = 'car-item__image';
         carImage.innerHTML = `<svg version="1.0" xmlns="http://www.w3.org/2000/svg"
@@ -35,7 +24,7 @@ class Car {
        Created by potrace 1.15, written by Peter Selinger 2001-2017
        </metadata>
        <g transform="translate(0.000000,640.000000) scale(0.100000,-0.100000)"
-       fill="${this.createRandomColor()}" stroke="none">
+       fill="${color}" stroke="none">
         <path d="M3565 5336 c-106 -30 -101 -26 -108 -111 -4 -42 -9 -80 -12 -85 -6
         -10 -246 -105 -590 -234 -448 -167 -1052 -415 -1173 -483 -78 -43 -193 -91
         -250 -104 -23 -5 -98 -14 -165 -19 -67 -6 -167 -19 -222 -30 -154 -31 -340
@@ -151,7 +140,7 @@ class Car {
 
         const carName = document.createElement('h3');
         carName.className = 'controls__car-name';
-        carName.textContent = this.createCarName();
+        carName.textContent = this.name;
         upperButtons.append(carName);
 
         const animationButtons = document.createElement('div');
@@ -168,7 +157,7 @@ class Car {
         stopButton.textContent = 'Stop';
         animationButtons.append(stopButton);
 
-        this.createCarImage();
+        this.createCarImage(this.color);
 
 
         return this.container;
