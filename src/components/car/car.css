@@ -15,6 +15,12 @@
     cursor: pointer;
 }
 
+.button_remove {
+    border: 2px solid #FE8484;
+    background-color: transparent;
+    color: #FE8484;
+}
+
 .controls {
     display: flex;
     align-items: center;
@@ -23,15 +29,19 @@
 
 .controls__car-name {
     font-size: 16px;
+    margin-left: 20px;
+    color: #FFDF00;
+}
+
+.car-item__image {
+    width: 150px;
+    height: 40px;
 }
 
 .car-item__image svg{
     width: 150px;
-    height: 60px;
-}
-
-.animation {
-    margin-bottom: 10px;
+    height: 40px;
+    padding-left: 70px;
 }
 
 .animation__button {
@@ -42,4 +52,14 @@
     font-size: 12px;
     margin-right: 5px;
     cursor: pointer;
+}
+
+.active {
+    border: 2px solid #3ED715;
+    background-color: transparent;
+    color: #3ED715;
+}
+
+.inactive {
+    opacity: 0.1;
 }

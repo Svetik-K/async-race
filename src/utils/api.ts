@@ -8,21 +8,19 @@ const paths = {
 type Param = { [key: string]: string}
 type Car = {
     name?: string,
-    color?: string
+    color?: string,
+    id?: number
 }
 
-const generateQueryParams = (params: Param[] = []) => {
+export const generateQueryParams = (params: Param[] = []) => {
     return params ? `?${params.map((param) => `${param.key}=${param.value}`).join('&')}` : '';
 }
 
 // get cars both with params and without
-export const getCars = async(queryParams: Param[]) => {
+export const getCars = async(queryParams: Param[] = []) => {
     const response = await fetch(`${mainUrl}${paths.cars}${generateQueryParams(queryParams)}`);
     const cars = await response.json();
-
     const count = Number(response.headers.get('X-Total-Count'));
-
-    console.log(cars, count)
 
     return { cars, count }
 }
@@ -31,8 +29,6 @@ export const getCars = async(queryParams: Param[]) => {
 export const getCar = async(id: number) => {
     const response = await fetch(`${mainUrl}${paths.cars}/${id}`);
     const car = await response.json();
-
-    console.log(car);
 
     return car;
 }

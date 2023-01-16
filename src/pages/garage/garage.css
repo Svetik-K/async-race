@@ -69,7 +69,13 @@ input[type='color'] {
 }
 
 .page__counter {
+    display: flex;
+    align-items: center;
     margin-bottom: 30px;
+}
+
+.garage__page-number {
+    font-size: 14px;
 }
 
 .pagination {
@@ -84,4 +90,14 @@ input[type='color'] {
     margin-right: 10px;
     cursor: pointer;
     text-transform: uppercase;
+}
+
+.active {
+    border: 2px solid #3ED715;
+    background-color: transparent;
+    color: #3ED715;
+}
+
+.inactive {
+    opacity: 0.1;
 }

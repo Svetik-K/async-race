@@ -1,54 +1,20 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
 import { createRandomColor, createCarName } from '../../utils/helpFuncs';
+import { generateQueryParams, createCar, getCars} from '../../utils/api';
 import './garage.css';
-
-const mainUrl = 'http://127.0.0.1:3000';
-const paths = {
-    cars: '/garage',
-    winners: '/winners'
-}
-
-type Param = { [key: string]: string}
-type CarModel = {
-    name: string,
-    color: string,
-    id?: number
-}
 
 class GaragePage {
     container: HTMLElement;
     header: Header;
+    cars: HTMLDivElement;
 
     constructor() {
         this.container = document.createElement('main');
         this.container.className = 'garage';
         this.header = new Header();
-    }
-
-    private generateQueryParams = (params: Param[] = []) => {
-        return params ? `?${params.map((param) => `${param.key}=${param.value}`).join('&')}` : '';
-    }
-
-    private getCars = async(queryParams: Param[] = []) => {
-        const response = await fetch(`${mainUrl}${paths.cars}${this.generateQueryParams(queryParams)}`);
-        const cars: CarModel[] = await response.json();
-        const count = Number(response.headers.get('X-Total-Count'));
-
-        return { cars, count };
-    }
-
-    private createCar = async(body: { name: string, color: string }) => {
-        const response = await fetch(`${mainUrl}${paths.cars}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(body)
-        });
-        const newCar = await response.json();
-    
-        return newCar;
+        this.cars = document.createElement('div');
+        this.cars.className = 'cars';
     }
 
     private generate100Cars() {
@@ -56,11 +22,78 @@ class GaragePage {
             const carName = createCarName();
             const carColor = createRandomColor();
             const car: Car = new Car(carName, carColor);
-            this.createCar(car);
-            this.container.append(car.draw());
+            createCar(car);
         }
     }
 
+    private createPaginationButtons() {
+        const paginationButtons = document.createElement('div');
+        paginationButtons.className = 'garage__pagination-buttons pagination';
+        this.container.append(paginationButtons);
+
+        const prevButton = document.createElement('button');
+        prevButton.className = 'pagination__button button_prev inactive';
+        prevButton.textContent = 'Prev';
+        prevButton.disabled = true;
+        paginationButtons.append(prevButton);
+
+        const nextButton = document.createElement('button');
+        nextButton.className = 'pagination__button button_next active';
+        nextButton.textContent = 'Next';
+        paginationButtons.append(nextButton);
+
+        nextButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.drawNextPage();
+        })
+
+        prevButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            this.drawPreviousPage();
+        })
+
+    }
+
+    private drawNextPage() {
+        const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
+        const buttonPrev = <HTMLButtonElement>document.querySelector('.button_prev');
+        const pageToDraw = Number(currentPage.textContent) + 1;
+        this.cars.innerHTML = '';
+
+        getCars([{key: '_page', value: `${pageToDraw}`}, {key: '_limit', value: '7'}]).then((data) => {
+            data.cars.forEach((car: Car) => {
+                const garageCar = new Car(car.name, car.color, car.id);
+                this.cars.append(garageCar.draw());
+                currentPage.textContent = `${pageToDraw}`;
+                if(buttonPrev.classList.contains('inactive')) {
+                    buttonPrev.classList.remove('inactive');
+                    buttonPrev.classList.add('active');
+                    buttonPrev.disabled = false;
+                }
+            });
+        });
+    }
+
+    private drawPreviousPage() {
+        const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
+        const buttonPrev = <HTMLButtonElement>document.querySelector('.button_prev');
+        if(currentPage.textContent === '1') {
+            buttonPrev.classList.remove('active');
+            buttonPrev.classList.add('inactive');
+            buttonPrev.disabled = true;
+        }
+
+        const pageToDraw = Number(currentPage.textContent) - 1;
+        this.cars.innerHTML = '';
+
+        getCars([{key: '_page', value: `${pageToDraw}`}, {key: '_limit', value: '7'}]).then((data) => {
+            data.cars.forEach((car: Car) => {
+                const garageCar = new Car(car.name, car.color, car.id);
+                this.cars.append(garageCar.draw());
+                currentPage.textContent = `${pageToDraw}`;
+            });
+        });
+    }
 
     draw() {
         this.header.draw();
@@ -149,36 +182,24 @@ class GaragePage {
 
         const pageNumber = document.createElement('span');
         pageNumber.className = 'garage__page-number';
-        pageNumber.textContent = '';
+        pageNumber.textContent = '0';
         pageCounter.append(pageNumber);
 
-        this.getCars().then((data) => {
-            data.cars.forEach((car) => {
+        this.container.append(this.cars);
+
+        getCars([{key: '_page', value: '0'}, {key: '_limit', value: '7'}]).then((data) => {
+            data.cars.forEach((car: Car) => {
                 const garageCar = new Car(car.name, car.color, car.id);
-                this.container.append(garageCar.draw());
+                this.cars.append(garageCar.draw());
             });
             carsNumber.textContent = `(${data.cars.length})`;
-            console.log(data.cars)
+            this.createPaginationButtons();
         });
-
-        const paginationButtons = document.createElement('div');
-        paginationButtons.className = 'garage__pagination-buttons pagination';
-        this.container.append(paginationButtons);
-
-        const prevButton = document.createElement('button');
-        prevButton.className = 'pagination__button button_prev';
-        prevButton.textContent = 'Prev';
-        paginationButtons.append(prevButton);
-
-        const nextButton = document.createElement('button');
-        nextButton.className = 'pagination__button button_next';
-        nextButton.textContent = 'Next';
-        paginationButtons.append(nextButton);
 
         generateButton.addEventListener('click', (e) => {
             e.preventDefault();
             this.generate100Cars();
-            carsNumber.textContent = `${Number(carsNumber.textContent) + 100}`;
+            carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 100})`;
         })
 
         return this.container;

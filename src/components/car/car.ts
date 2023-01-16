@@ -148,13 +148,14 @@ class Car {
         this.container.append(animationButtons);
 
         const startButton = document.createElement('button');
-        startButton.className = 'animation__button button_start';
+        startButton.className = 'animation__button button_start active';
         startButton.textContent = 'Start';
         animationButtons.append(startButton);
 
         const stopButton = document.createElement('button');
-        stopButton.className = 'animation__button button_stop';
+        stopButton.className = 'animation__button button_stop inactive';
         stopButton.textContent = 'Stop';
+        stopButton.disabled = true;
         animationButtons.append(stopButton);
 
         this.createCarImage(this.color);
