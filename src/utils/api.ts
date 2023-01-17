@@ -84,3 +84,14 @@ export const deleteCar = async(id: number) => {
 
     return deletedCar;
 }
+
+// Winners
+
+// get all winners
+export const getWinners = async(queryParams: Param[] = []) => {
+    const response = await fetch(`${mainUrl}${paths.winners}${generateQueryParams(queryParams)}`);
+    const winners = await response.json();
+    const count = Number(response.headers.get('X-Total-Count'));
+
+    return { winners, count }
+}

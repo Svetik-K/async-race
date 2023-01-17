@@ -16,3 +16,13 @@
     margin-right: 20px;
     font-size: 14px;
 }
+
+.button_garage {
+    border: 2px solid #f60b8a;
+    color: #f60b8a;
+}
+
+.button_winners {
+    border: 2px solid #E56717;
+    color: #E56717;
+}

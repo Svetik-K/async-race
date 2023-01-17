@@ -1,13 +1,23 @@
 import Header from '../../components/header/header';
+import { getWinners } from '../../utils/api';
 import './winners.css';
+
+type Winner = {
+    id: number,
+    wins: number,
+    time: number
+}
+
 class WinnersPage {
     container: HTMLDivElement;
     header: Header;
+    tbody: HTMLTableSectionElement;
 
     constructor() {
         this.container = document.createElement('div');
         this.container.className = 'winners';
         this.header = new Header();
+        this.tbody = document.createElement('tbody');
     }
 
     private createWinnersTable() {
@@ -15,8 +25,11 @@ class WinnersPage {
         table.className = 'winners__table';
         this.container.append(table);
 
+        const thead = document.createElement('thead');
+        table.append(thead);
+
         const headers = document.createElement('tr');
-        table.append(headers);
+        thead.append(headers);
         
         const col1 = document.createElement('th');
         col1.textContent = 'Number';
@@ -37,6 +50,9 @@ class WinnersPage {
         const col5 = document.createElement('th');
         col5.textContent = 'Best time (seconds)';
         headers.append(col5);
+
+        table.append(this.tbody);
+
     }
 
     private createPaginationButtons() {
@@ -98,6 +114,27 @@ class WinnersPage {
         winPageCounter.append(pageNumber);
 
         this.createWinnersTable();
+
+        getWinners().then((data) => {
+            data.winners.forEach((winner: Winner) => {
+                console.log(data.winners)
+                const row = document.createElement('tr');
+                const number = document.createElement('td');
+                row.append(number);
+                number.textContent = `${winner.id}`;
+                const icon = document.createElement('td');
+                row.append(icon);
+                const name = document.createElement('td');
+                row.append(name);
+                const wins = document.createElement('td');
+                row.append(wins);
+                wins.textContent = `${winner.wins}`;
+                const time = document.createElement('td');
+                row.append(time);
+                time.textContent = `${winner.time}`;
+                this.tbody.append(row);
+            })
+        });
 
         this.createPaginationButtons();
 

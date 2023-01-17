@@ -22,11 +22,22 @@
     font-size: 14px;
 }
 
+.winners__table {
+    margin-bottom: 40px;
+}
+
 th {
     padding: 5px 10px;
     text-align: left;
     background-color: chartreuse;
     color: #000000;
+    font-size: 16px;
+}
+
+td {
+    padding: 5px 10px;
+    text-align: left;
+    font-size: 14px;
 }
 
 .win-pagination {
