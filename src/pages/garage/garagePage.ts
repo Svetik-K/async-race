@@ -34,8 +34,13 @@ class GaragePage {
         paginationButtons.append(nextButton);
 
         nextButton.addEventListener('click', (e) => {
+            const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
+            const numberCars = Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1));
+            if(numberCars <= 7) {
+                return;
+            }
             e.preventDefault();
-            this.drawNextPage();
+            this.drawNextPage();   
         })
 
         prevButton.addEventListener('click', (e) => {
@@ -59,7 +64,7 @@ class GaragePage {
     private drawPreviousPage() {
         const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
         const buttonPrev = <HTMLButtonElement>document.querySelector('.button_prev');
-        if(currentPage.textContent === '1') {
+        if(currentPage.textContent === '2') {
             buttonPrev.classList.remove('active');
             buttonPrev.classList.add('inactive');
             buttonPrev.disabled = true;
@@ -79,12 +84,13 @@ class GaragePage {
             return;
         }
         const car: Car = new Car(carName, carColor);
-        createCar(car);
-        const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
-        this.fetchGarageCars(`${currentPage.textContent}`);
-        carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 1})`;
-        nameInput.value = '';
-        colorInput.value = '#000000';
+        createCar(car).then(() => {
+            const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
+            this.fetchGarageCars(`${currentPage.textContent}`);
+            carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 1})`;
+            nameInput.value = '';
+            colorInput.value = '#000000';
+        });  
     }
 
     private generate100Cars() {
@@ -139,12 +145,12 @@ class GaragePage {
         createBlock.append(colorInput);
 
         const createButton = document.createElement('button');
-        createButton.className = 'create__button';
+        createButton.className = 'create__button active';
         createButton.textContent = 'Create';
         createBlock.append(createButton);
 
         const updateBlock = document.createElement('div');
-        updateBlock.className = 'garage__update update';
+        updateBlock.className = 'garage__update update blocked';
         this.container.append(updateBlock);
 
         const updateNameInput = document.createElement('input');
@@ -222,7 +228,7 @@ class GaragePage {
 
         this.container.append(this.cars);
 
-        this.fetchGarageCars('0');
+        this.fetchGarageCars('1');
 
         this.getNumberCarsInGarage();
 
@@ -247,6 +253,8 @@ class GaragePage {
             const id = nextBtn.id.slice(1);
             target.classList.add('active');
             if(target.classList.contains('button_select')) {
+                updateButton.classList.add('active');
+                updateBlock.classList.remove('blocked');
                 updateButton.addEventListener('click', (e) => {
                     e.preventDefault();
                     const newName =  updateNameInput.value;
@@ -260,6 +268,8 @@ class GaragePage {
                         updateNameInput.value = '';
                         updateColorInput.value = '#000000';
                         target.classList.remove('active');
+                        updateBlock.classList.add('blocked');
+                        updateButton.classList.remove('active');
                     })
                 })
             }

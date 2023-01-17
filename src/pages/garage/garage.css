@@ -10,6 +10,10 @@
     margin-bottom: 10px;
 }
 
+.blocked {
+    pointer-events: none;
+}
+
 .create__button,
 .update__button {
     width: 80px;
