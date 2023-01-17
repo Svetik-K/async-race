@@ -1,7 +1,7 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
 import { createRandomColor, createCarName } from '../../utils/helpFuncs';
-import { createCar, getCars, deleteCar } from '../../utils/api';
+import { createCar, getCars, deleteCar, patchCar } from '../../utils/api';
 import './garage.css';
 
 class GaragePage {
@@ -80,8 +80,11 @@ class GaragePage {
         }
         const car: Car = new Car(carName, carColor);
         createCar(car);
-        this.cars.append(car.draw());
+        const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
+        this.fetchGarageCars(`${currentPage.textContent}`);
         carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 1})`;
+        nameInput.value = '';
+        colorInput.value = '#000000';
     }
 
     private generate100Cars() {
@@ -235,6 +238,31 @@ class GaragePage {
                     carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) - 1})`;
                 }); 
             } 
+        })
+
+        this.cars.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = <HTMLButtonElement>e.target;
+            const nextBtn = <HTMLButtonElement>target.nextElementSibling;
+            const id = nextBtn.id.slice(1);
+            target.classList.add('active');
+            if(target.classList.contains('button_select')) {
+                updateButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const newName =  updateNameInput.value;
+                    const newColor = updateColorInput.value;
+                    if(newName === '' || newColor === '#000000') {
+                        return;
+                    }
+                    patchCar(Number(id), {name: newName, color: newColor}).then(() => {
+                        const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
+                        this.fetchGarageCars(`${currentPage.textContent}`);
+                        updateNameInput.value = '';
+                        updateColorInput.value = '#000000';
+                        target.classList.remove('active');
+                    })
+                })
+            }
         })
 
         return this.container;
