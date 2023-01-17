@@ -1,7 +1,7 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
 import { createRandomColor, createCarName } from '../../utils/helpFuncs';
-import { createCar, getCars } from '../../utils/api';
+import { createCar, getCars, deleteCar } from '../../utils/api';
 import './garage.css';
 
 class GaragePage {
@@ -15,15 +15,6 @@ class GaragePage {
         this.header = new Header();
         this.cars = document.createElement('div');
         this.cars.className = 'cars';
-    }
-
-    private generate100Cars() {
-        for(let i = 0; i < 100; i++) {
-            const carName = createCarName();
-            const carColor = createRandomColor();
-            const car: Car = new Car(carName, carColor);
-            createCar(car);
-        }
     }
 
     private createPaginationButtons() {
@@ -51,27 +42,18 @@ class GaragePage {
             e.preventDefault();
             this.drawPreviousPage();
         })
-
     }
 
     private drawNextPage() {
         const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
         const buttonPrev = <HTMLButtonElement>document.querySelector('.button_prev');
         const pageToDraw = Number(currentPage.textContent) + 1;
-        this.cars.innerHTML = '';
-
-        getCars([{key: '_page', value: `${pageToDraw}`}, {key: '_limit', value: '7'}]).then((data) => {
-            data.cars.forEach((car: Car) => {
-                const garageCar = new Car(car.name, car.color, car.id);
-                this.cars.append(garageCar.draw());
-                currentPage.textContent = `${pageToDraw}`;
-                if(buttonPrev.classList.contains('inactive')) {
-                    buttonPrev.classList.remove('inactive');
-                    buttonPrev.classList.add('active');
-                    buttonPrev.disabled = false;
-                }
-            });
-        });
+        if(buttonPrev.classList.contains('inactive')) {
+            buttonPrev.classList.remove('inactive');
+            buttonPrev.classList.add('active');
+            buttonPrev.disabled = false;
+        }
+        this.fetchGarageCars(String(pageToDraw));
     }
 
     private drawPreviousPage() {
@@ -82,17 +64,8 @@ class GaragePage {
             buttonPrev.classList.add('inactive');
             buttonPrev.disabled = true;
         }
-
         const pageToDraw = Number(currentPage.textContent) - 1;
-        this.cars.innerHTML = '';
-
-        getCars([{key: '_page', value: `${pageToDraw}`}, {key: '_limit', value: '7'}]).then((data) => {
-            data.cars.forEach((car: Car) => {
-                const garageCar = new Car(car.name, car.color, car.id);
-                this.cars.append(garageCar.draw());
-                currentPage.textContent = `${pageToDraw}`;
-            });
-        });
+        this.fetchGarageCars(String(pageToDraw));
     }
     
     private addOneCar() {
@@ -100,13 +73,49 @@ class GaragePage {
         const carName = nameInput.value;
         const colorInput = <HTMLInputElement>document.querySelector('.create__color');
         const carColor = colorInput.value;
+        const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
+
         if(carName === '' || carColor === '#000000') {
             return;
         }
         const car: Car = new Car(carName, carColor);
         createCar(car);
         this.cars.append(car.draw());
+        carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 1})`;
     }
+
+    private generate100Cars() {
+        for(let i = 0; i < 100; i++) {
+            const carName = createCarName();
+            const carColor = createRandomColor();
+            const car: Car = new Car(carName, carColor);
+            createCar(car);
+        }
+        const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
+        this.fetchGarageCars(`${currentPage.textContent}`);
+        const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
+        carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 100})`;
+    }
+
+    private fetchGarageCars(page: string) {
+        getCars([{key: '_page', value: `${page}`}, {key: '_limit', value: '7'}]).then((data) => {
+            this.cars.innerHTML = '';
+            data.cars.forEach((car: Car) => {
+                const garageCar = new Car(car.name, car.color, car.id);
+                this.cars.append(garageCar.draw());
+            });
+            const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
+            currentPage.textContent = page; 
+        });
+    }
+
+    private getNumberCarsInGarage() {
+        getCars().then((data) => {
+            const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
+            carsNumber.textContent = `(${data.cars.length})`;
+        });
+    }
+
 
     draw() {
         this.header.draw();
@@ -181,7 +190,7 @@ class GaragePage {
 
         const carsNumber = document.createElement('span');
         carsNumber.className = 'garage__number';
-        carsNumber.textContent = '()';
+        carsNumber.textContent = '(4)';
         carsCounter.append(carsNumber);
 
         const pageCounter = document.createElement('div');
@@ -198,26 +207,34 @@ class GaragePage {
         pageNumber.textContent = '0';
         pageCounter.append(pageNumber);
 
-        this.container.append(this.cars);
-
-        getCars([{key: '_page', value: '0'}, {key: '_limit', value: '7'}]).then((data) => {
-            data.cars.forEach((car: Car) => {
-                const garageCar = new Car(car.name, car.color, car.id);
-                this.cars.append(garageCar.draw());
-            });
-            carsNumber.textContent = `(${data.cars.length})`;
-            this.createPaginationButtons();
-        });
-
         generateButton.addEventListener('click', (e) => {
             e.preventDefault();
             this.generate100Cars();
-            carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 100})`;
         })
 
         createButton.addEventListener('click', (e) => {
             e.preventDefault();
             this.addOneCar();
+        })
+
+        this.container.append(this.cars);
+
+        this.fetchGarageCars('0');
+
+        this.getNumberCarsInGarage();
+
+        this.createPaginationButtons();
+
+        this.cars.addEventListener('click', (e) => {
+            const target = <HTMLButtonElement>e.target;
+            if(target.classList.contains('button_remove')) {
+                deleteCar(Number(target.id.slice(1))).then(() => {
+                    const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
+                    this.fetchGarageCars(`${currentPage.textContent}`);
+                    const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
+                    carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) - 1})`;
+                }); 
+            } 
         })
 
         return this.container;
