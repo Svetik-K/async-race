@@ -199,7 +199,7 @@ class GaragePage {
 
         const carsNumber = document.createElement('span');
         carsNumber.className = 'garage__number';
-        carsNumber.textContent = '(4)';
+        carsNumber.textContent = '';
         carsCounter.append(carsNumber);
 
         const pageCounter = document.createElement('div');

@@ -2,6 +2,10 @@
     width: 100%;
     border-bottom: 2px dashed #FFFFFF;
     padding-top: 10px;
+    background: url('../../assets/svg/finish.png');
+    background-repeat: no-repeat;
+    background-position: right 100px bottom;
+    background-size: 60px;
 }
 
 .controls__button {
