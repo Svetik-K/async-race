@@ -1,7 +1,7 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
 import { createRandomColor, createCarName } from '../../utils/helpFuncs';
-import { createCar, getCars, deleteCar, patchCar } from '../../utils/api';
+import { createCar, getCars, deleteCar, patchCar, startEngine } from '../../utils/api';
 import './garage.css';
 
 class GaragePage {
@@ -90,7 +90,7 @@ class GaragePage {
             carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 1})`;
             nameInput.value = '';
             colorInput.value = '#000000';
-        });  
+        }).catch((error) => console.log(error.message));  
     }
 
     private generate100Cars() {
@@ -115,14 +115,23 @@ class GaragePage {
             });
             const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
             currentPage.textContent = page; 
-        });
+        }).catch((error) => console.log(error.message));
     }
 
     private getNumberCarsInGarage() {
         getCars().then((data) => {
             const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
             carsNumber.textContent = `(${data.cars.length})`;
-        });
+        }).catch((error) => console.log(error.message));
+    }
+
+    animateCar(id: number, duration: number) {
+        const carCard = <HTMLDivElement>document.getElementById(`${id}`);
+        const carImage = <HTMLDivElement>carCard.lastChild;
+        carImage.style.transition = `${duration}ms linear`;
+        const boxLength = carCard.offsetWidth;
+        const distance = +boxLength - 50 - 130;
+        carImage.style.transform = `translateX(${distance}px)`;
     }
 
 
@@ -234,6 +243,7 @@ class GaragePage {
 
         this.createPaginationButtons();
 
+        //remove a car
         this.cars.addEventListener('click', (e) => {
             const target = <HTMLButtonElement>e.target;
             const idParent = <HTMLDivElement>target.parentElement?.parentElement;
@@ -243,17 +253,18 @@ class GaragePage {
                     this.fetchGarageCars(`${currentPage.textContent}`);
                     const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
                     carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) - 1})`;
-                }); 
+                }).catch((error) => console.log(error.message)); 
             } 
         })
 
+        //update car
         this.cars.addEventListener('click', (e) => {
             e.preventDefault();
             const target = <HTMLButtonElement>e.target;
             const idParent = <HTMLDivElement>target.parentElement?.parentElement;
             const id = idParent.id;
-            target.classList.add('active');
             if(target.classList.contains('button_select')) {
+                target.classList.add('active');
                 updateButton.classList.add('active');
                 updateBlock.classList.remove('blocked');
                 updateButton.addEventListener('click', (e) => {
@@ -271,9 +282,46 @@ class GaragePage {
                         target.classList.remove('active');
                         updateBlock.classList.add('blocked');
                         updateButton.classList.remove('active');
-                    })
+                    }).catch((error) => console.log(error.message));
                 })
             }
+        })
+
+        //animate single car
+        this.cars.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = <HTMLButtonElement>e.target;
+            const idParent = <HTMLDivElement>target.parentElement?.parentElement;
+            const id = idParent.id;
+            if(target.classList.contains('button_start')) {
+                target.classList.remove('active');
+                target.classList.add('inactive');
+                target.disabled = true;
+                const buttonStop = <HTMLButtonElement>target.nextElementSibling;
+                buttonStop.classList.remove('inactive');
+                buttonStop.classList.add('active');
+                buttonStop.disabled = false;
+                startEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}]).then((data) => {
+                    const duration = data.distance / data.velocity;
+                    this.animateCar(Number(id), duration);
+                }).catch((error) => console.log(error.message));
+            }
+            else if(target.classList.contains('button_stop')) {
+                // Code for stopping car
+            }
+        })
+
+        //animate all cars
+        raceButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll('.car-item');
+            const ids = Array.from(cards).map((item) => item.id);
+            ids.forEach((id) => {
+                startEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}]).then((data) => {
+                    const duration = data.distance / data.velocity;
+                    this.animateCar(Number(id), duration);
+                }).catch((error) => console.log(error.message));
+            });
         })
 
         return this.container;

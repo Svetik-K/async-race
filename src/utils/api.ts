@@ -2,10 +2,11 @@ const mainUrl = 'http://127.0.0.1:3000';
 
 const paths = {
     cars: '/garage',
-    winners: '/winners'
+    winners: '/winners',
+    engine: '/engine'
 }
 
-type Param = { [key: string]: string}
+type Param = { [key: string]: string | number}
 type Car = {
     name?: string,
     color?: string,
@@ -83,6 +84,19 @@ export const deleteCar = async(id: number) => {
     const deletedCar = await response.json();
 
     return deletedCar;
+}
+
+// start engine
+export const startEngine = async(queryParams: Param[] = []) => {
+    const response = await fetch(`${mainUrl}${paths.engine}${generateQueryParams(queryParams)}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    });
+    const carInfo = await response.json();
+
+    return carInfo;
 }
 
 // Winners

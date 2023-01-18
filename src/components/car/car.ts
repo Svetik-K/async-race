@@ -136,7 +136,6 @@ class Car {
 
         const removeButton = document.createElement('button');
         removeButton.className = 'controls__button button_remove';
-        // removeButton.id = `#${this.id}`;
         removeButton.textContent = 'Remove';
         upperButtons.append(removeButton);
 
