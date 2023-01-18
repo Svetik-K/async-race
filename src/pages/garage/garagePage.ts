@@ -236,8 +236,9 @@ class GaragePage {
 
         this.cars.addEventListener('click', (e) => {
             const target = <HTMLButtonElement>e.target;
+            const idParent = <HTMLDivElement>target.parentElement?.parentElement;
             if(target.classList.contains('button_remove')) {
-                deleteCar(Number(target.id.slice(1))).then(() => {
+                deleteCar(Number(idParent.id)).then(() => {
                     const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
                     this.fetchGarageCars(`${currentPage.textContent}`);
                     const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
@@ -249,8 +250,8 @@ class GaragePage {
         this.cars.addEventListener('click', (e) => {
             e.preventDefault();
             const target = <HTMLButtonElement>e.target;
-            const nextBtn = <HTMLButtonElement>target.nextElementSibling;
-            const id = nextBtn.id.slice(1);
+            const idParent = <HTMLDivElement>target.parentElement?.parentElement;
+            const id = idParent.id;
             target.classList.add('active');
             if(target.classList.contains('button_select')) {
                 updateButton.classList.add('active');

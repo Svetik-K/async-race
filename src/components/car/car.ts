@@ -9,6 +9,7 @@ class Car {
     constructor(name: string, color: string, id?: number) {
         this.container = document.createElement('div');
         this.container.className = 'car-item';
+        this.container.id = `${id}`;
         this.name = name;
         this.color = color;
         this.id = id;
@@ -135,7 +136,7 @@ class Car {
 
         const removeButton = document.createElement('button');
         removeButton.className = 'controls__button button_remove';
-        removeButton.id = `#${this.id}`;
+        // removeButton.id = `#${this.id}`;
         removeButton.textContent = 'Remove';
         upperButtons.append(removeButton);
 
