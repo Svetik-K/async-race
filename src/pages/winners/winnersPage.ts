@@ -115,26 +115,26 @@ class WinnersPage {
 
         this.createWinnersTable();
 
-        getWinners().then((data) => {
-            data.winners.forEach((winner: Winner) => {
-                console.log(data.winners)
-                const row = document.createElement('tr');
-                const number = document.createElement('td');
-                row.append(number);
-                number.textContent = `${winner.id}`;
-                const icon = document.createElement('td');
-                row.append(icon);
-                const name = document.createElement('td');
-                row.append(name);
-                const wins = document.createElement('td');
-                row.append(wins);
-                wins.textContent = `${winner.wins}`;
-                const time = document.createElement('td');
-                row.append(time);
-                time.textContent = `${winner.time}`;
-                this.tbody.append(row);
-            })
-        });
+        // getWinners().then((data) => {
+        //     data.winners.forEach((winner: Winner) => {
+        //         console.log(data.winners)
+        //         const row = document.createElement('tr');
+        //         const number = document.createElement('td');
+        //         row.append(number);
+        //         number.textContent = `${winner.id}`;
+        //         const icon = document.createElement('td');
+        //         row.append(icon);
+        //         const name = document.createElement('td');
+        //         row.append(name);
+        //         const wins = document.createElement('td');
+        //         row.append(wins);
+        //         wins.textContent = `${winner.wins}`;
+        //         const time = document.createElement('td');
+        //         row.append(time);
+        //         time.textContent = `${winner.time}`;
+        //         this.tbody.append(row);
+        //     })
+        // });
 
         this.createPaginationButtons();
 

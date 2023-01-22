@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "lib": ["dom"],
+    "lib": ["dom", "ES2021.Promise"],
     "allowSyntheticDefaultImports": true,
     "noImplicitAny": true,
     "strict": true,

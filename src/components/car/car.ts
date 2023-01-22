@@ -126,7 +126,7 @@ class Car {
     draw() {
 
         const upperButtons = document.createElement('div');
-        upperButtons.className = 'car-item__control-butttons controls';
+        upperButtons.className = 'car-item__control-buttons controls';
         this.container.append(upperButtons);
 
         const selectButton = document.createElement('button');
@@ -145,7 +145,7 @@ class Car {
         upperButtons.append(carName);
 
         const animationButtons = document.createElement('div');
-        animationButtons.className = 'car-item__animation-butttons animation';
+        animationButtons.className = 'car-item__animation-buttons animation';
         this.container.append(animationButtons);
 
         const startButton = document.createElement('button');
@@ -158,6 +158,26 @@ class Car {
         stopButton.textContent = 'Stop';
         stopButton.disabled = true;
         animationButtons.append(stopButton);
+
+        startButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            startButton.classList.remove('active');
+            startButton.classList.add('inactive');
+            startButton.disabled = true;    
+            stopButton.classList.remove('inactive');
+            stopButton.classList.add('active');
+            stopButton.disabled = false;
+        })
+
+        stopButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            stopButton.classList.remove('active');
+            stopButton.classList.add('inactive');
+            stopButton.disabled = true;    
+            startButton.classList.remove('inactive');
+            startButton.classList.add('active');
+            startButton.disabled = false;
+        })
 
         this.createCarImage(this.color);
 

@@ -1,13 +1,19 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
-import { createRandomColor, createCarName } from '../../utils/helpFuncs';
-import { createCar, getCars, deleteCar, patchCar, startEngine } from '../../utils/api';
+import { createRandomColor, createCarName} from '../../utils/helpers';
+import { createCar, getCar, getCars, deleteCar, patchCar, controlEngine, deleteWinner, driveEngine } from '../../utils/api';
 import './garage.css';
+
+type CarData = {
+    distance: number,
+    velocity: number
+}
 
 class GaragePage {
     container: HTMLElement;
     header: Header;
     cars: HTMLDivElement;
+    moveId: number;
 
     constructor() {
         this.container = document.createElement('main');
@@ -15,6 +21,7 @@ class GaragePage {
         this.header = new Header();
         this.cars = document.createElement('div');
         this.cars.className = 'cars';
+        this.moveId = 0;
     }
 
     private createPaginationButtons() {
@@ -84,13 +91,15 @@ class GaragePage {
             return;
         }
         const car: Car = new Car(carName, carColor);
-        createCar(car).then(() => {
+        createCar(car)
+        .then(() => {
             const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
             this.fetchGarageCars(`${currentPage.textContent}`);
             carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 1})`;
             nameInput.value = '';
             colorInput.value = '#000000';
-        }).catch((error) => console.log(error.message));  
+        })
+        .catch((error) => console.log(error.message));  
     }
 
     private generate100Cars() {
@@ -107,33 +116,69 @@ class GaragePage {
     }
 
     private fetchGarageCars(page: string) {
-        getCars([{key: '_page', value: `${page}`}, {key: '_limit', value: '7'}]).then((data) => {
+        getCars([{key: '_page', value: `${page}`}, {key: '_limit', value: '7'}])
+        .then((data) => {
             this.cars.innerHTML = '';
             data.cars.forEach((car: Car) => {
                 const garageCar = new Car(car.name, car.color, car.id);
                 this.cars.append(garageCar.draw());
             });
             const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
-            currentPage.textContent = page; 
-        }).catch((error) => console.log(error.message));
+            currentPage.textContent = page;
+        })
+        .catch((error) => console.log(error.message));
     }
 
     private getNumberCarsInGarage() {
-        getCars().then((data) => {
+        getCars()
+        .then((data) => {
             const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
             carsNumber.textContent = `(${data.cars.length})`;
-        }).catch((error) => console.log(error.message));
+        })
+        .catch((error) => console.log(error.message));
     }
 
-    animateCar(id: number, duration: number) {
+    private animateCar(data: CarData, id: number) {
+        const duration = data.distance / data.velocity;
         const carCard = <HTMLDivElement>document.getElementById(`${id}`);
         const carImage = <HTMLDivElement>carCard.lastChild;
-        carImage.style.transition = `${duration}ms linear`;
-        const boxLength = carCard.offsetWidth;
-        const distance = +boxLength - 50 - 130;
-        carImage.style.transform = `translateX(${distance}px)`;
+                    
+        let currentX = carImage.offsetLeft;
+        const distance = carCard.offsetWidth - 160;
+        const framesCount = duration / 1000 * 60;
+        const moveX = (distance - carImage.offsetLeft) / framesCount;
+        
+        const move = () => {
+            currentX += moveX;
+            carImage.style.transform = `translateX(${currentX}px)`;         
+            if(currentX < distance) {    
+                this.moveId = requestAnimationFrame(move); 
+            }
+        }
+        this.moveId = requestAnimationFrame(move);     
     }
 
+    private driveCar(id: number) {
+        driveEngine([{key: 'id', value: id}, {key: 'status', value: 'drive'}])
+        .then((status) => {
+            if(status === 500) {
+                cancelAnimationFrame(this.moveId);
+                controlEngine([{key: 'id', value: id}, {key: 'status', value: 'stopped'}])
+            }
+        })
+        .catch((error) => console.log(error.message));
+    }
+
+    private stopCar(id: number) {
+        const carCard = <HTMLDivElement>document.getElementById(`${id}`);
+        const carImage = <HTMLDivElement>carCard.lastChild;
+        controlEngine([{key: 'id', value: id}, {key: 'status', value: 'stopped'}])
+        .then(() => {
+            cancelAnimationFrame(this.moveId);
+            carImage.style.transform = `translateX(0px)`;
+        })
+        .catch((error) => console.log(error));
+    }
 
     draw() {
         this.header.draw();
@@ -247,13 +292,17 @@ class GaragePage {
         this.cars.addEventListener('click', (e) => {
             const target = <HTMLButtonElement>e.target;
             const idParent = <HTMLDivElement>target.parentElement?.parentElement;
+            const id = idParent.id;
             if(target.classList.contains('button_remove')) {
-                deleteCar(Number(idParent.id)).then(() => {
+                deleteCar(Number(id))
+                .then(() => {
                     const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
                     this.fetchGarageCars(`${currentPage.textContent}`);
                     const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
                     carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) - 1})`;
-                }).catch((error) => console.log(error.message)); 
+                    // deleteWinner(Number(id)); 
+                })
+                .catch((error) => console.log(error.message)); 
             } 
         })
 
@@ -262,8 +311,10 @@ class GaragePage {
             e.preventDefault();
             const target = <HTMLButtonElement>e.target;
             const idParent = <HTMLDivElement>target.parentElement?.parentElement;
+            const carName = <HTMLHeadingElement>target.nextElementSibling?.nextElementSibling;
             const id = idParent.id;
             if(target.classList.contains('button_select')) {
+                updateNameInput.value = <string>carName.textContent;
                 target.classList.add('active');
                 updateButton.classList.add('active');
                 updateBlock.classList.remove('blocked');
@@ -274,7 +325,8 @@ class GaragePage {
                     if(newName === '' || newColor === '#000000') {
                         return;
                     }
-                    patchCar(Number(id), {name: newName, color: newColor}).then(() => {
+                    patchCar(Number(id), {name: newName, color: newColor})
+                    .then(() => {
                         const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
                         this.fetchGarageCars(`${currentPage.textContent}`);
                         updateNameInput.value = '';
@@ -282,7 +334,8 @@ class GaragePage {
                         target.classList.remove('active');
                         updateBlock.classList.add('blocked');
                         updateButton.classList.remove('active');
-                    }).catch((error) => console.log(error.message));
+                    })
+                    .catch((error) => console.log(error.message));
                 })
             }
         })
@@ -294,20 +347,16 @@ class GaragePage {
             const idParent = <HTMLDivElement>target.parentElement?.parentElement;
             const id = idParent.id;
             if(target.classList.contains('button_start')) {
-                target.classList.remove('active');
-                target.classList.add('inactive');
-                target.disabled = true;
-                const buttonStop = <HTMLButtonElement>target.nextElementSibling;
-                buttonStop.classList.remove('inactive');
-                buttonStop.classList.add('active');
-                buttonStop.disabled = false;
-                startEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}]).then((data) => {
-                    const duration = data.distance / data.velocity;
-                    this.animateCar(Number(id), duration);
-                }).catch((error) => console.log(error.message));
+                controlEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}])
+                .then((data: CarData) => {
+                    this.animateCar(data, Number(id));
+                    this.driveCar(Number(id));
+                })
+                .catch((error) => console.log(error.message));
             }
-            else if(target.classList.contains('button_stop')) {
-                // Code for stopping car
+
+            if(target.classList.contains('button_stop')) {
+                this.stopCar(Number(id));
             }
         })
 
@@ -315,13 +364,29 @@ class GaragePage {
         raceButton.addEventListener('click', (e) => {
             e.preventDefault();
             const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll('.car-item');
-            const ids = Array.from(cards).map((item) => item.id);
-            ids.forEach((id) => {
-                startEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}]).then((data) => {
-                    const duration = data.distance / data.velocity;
-                    this.animateCar(Number(id), duration);
-                }).catch((error) => console.log(error.message));
+      
+            Array.from(cards).forEach((card) => {
+                const id = card.id;
+                controlEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}])
+                .then((data: CarData) => {
+                    this.animateCar(data, Number(id));
+                })
+                .catch((error) => console.log(error.message));
             });
+        })
+
+        // reset
+        resetButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll('.car-item');
+           
+            Array.from(cards).forEach((card) => {
+                const id = card.id;
+                controlEngine([{key: 'id', value: id}, {key: 'status', value: 'stopped'}])
+                .then(() => {
+                    this.stopCar(Number(id));
+                })
+            })
         })
 
         return this.container;
@@ -329,3 +394,5 @@ class GaragePage {
 }
 
 export default GaragePage;
+
+
