@@ -173,7 +173,7 @@ export const updateWinner = async(id: number, winner: Winner) => {
     return updatedWinner;
 }
 
-export const getWinnerStatus = async(id: number) => (await fetch(`${mainUrl}${paths.cars}/${id}`)).status;
+export const getWinnerStatus = async(id: number) => (await fetch(`${mainUrl}${paths.winners}/${id}`)).status;
 
 export const saveWinner = async(id: number, time: number) => {
     const winnerStatus = await getWinnerStatus(id);

@@ -111,3 +111,24 @@ input[type='color'] {
 .inactive {
     opacity: 0.1;
 }
+
+.winner__wrapper {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.winner {
+    width: 90%;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    font-size: 42px;
+    font-weight: bold;
+    color: #3ED715;
+}

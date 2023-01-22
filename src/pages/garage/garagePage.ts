@@ -1,7 +1,7 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
 import { createRandomColor, createCarName, raceAll} from '../../utils/helpers';
-import { createCar, getCar, getCars, deleteCar, patchCar, controlEngine, deleteWinner, driveEngine } from '../../utils/api';
+import { createCar, getCar, getCars, deleteCar, patchCar, controlEngine, deleteWinner, driveEngine, saveWinner} from '../../utils/api';
 import './garage.css';
 
 type CarData = {
@@ -216,17 +216,35 @@ class GaragePage {
         })
     }
 
-    public async getStartPromises() {
-        const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll('.car-item');
+    public async getStartPromises(cards: NodeListOf<HTMLDivElement>) {
         const promises: Promise<CarData>[] = [];
         Array.from(cards).forEach((card) => {
             const id = card.id;
             const promise = controlEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}]);
-            console.log(promise)
             promises.push(promise)
         });
         const result = await Promise.all(promises);
         return result;
+    }
+
+    private showWinner(time: number, name: string) {
+        const winnerWrapper = document.createElement('div');
+        winnerWrapper.className = 'winner__wrapper';
+        winnerWrapper.style.display = 'flex';
+
+        const winner = document.createElement('div');
+        winner.className = 'winner';
+        winner.textContent = `${name} came first (${(time/ 1000).toFixed(2)}s)`;
+        winnerWrapper.append(winner);
+
+        document.body.prepend(winnerWrapper);
+
+        window.addEventListener('click', (e) => {
+            const target = <HTMLDivElement>e.target;
+            if(target.classList.contains('winner__wrapper')) {
+                winnerWrapper.style.display = 'none';
+            }
+        })
     }
 
     draw() {
@@ -413,11 +431,32 @@ class GaragePage {
             e.preventDefault();
             const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll('.car-item');
             const ids = Array.from(cards).map((card) => card.id);
-
-            this.getStartPromises().then((res) => {
+            this.getStartPromises(cards).then((res) => {
+                const times = res.map((el) => el.distance / el.velocity);
+                const minTime = Math.min(...times);
                 res.forEach((item, index) => {
-                    this.animateCar(item, Number(ids[index]));
-                    this.driveCar(Number(ids[index]));
+                    const itemId = ids[index];
+                    const carNameHeading = <HTMLHeadingElement>cards[index].firstChild?.lastChild;
+                    const carName = <string>carNameHeading.textContent;
+                    const carTime = item.distance / item.velocity;
+                    this.animateCar(item, Number(itemId));
+                    driveEngine([{key: 'id', value: itemId}, {key: 'status', value: 'drive'}])
+                    .then((status) => {
+                        if(carTime === minTime && status === 200) {
+                            setTimeout(() => {
+                                const time = (carTime / 1000).toFixed(2);
+                                this.showWinner(carTime, carName);
+                                saveWinner(Number(itemId), Number(time));   
+                            }, 0);
+                        }
+                        if(status === 500) {
+                            cancelAnimationFrame(this.moveId);
+                            controlEngine([{key: 'id', value: itemId}, {key: 'status', value: 'stopped'}])
+                        }
+  
+                    })
+                    .catch((error) => console.log(error.message));
+
                     this.disableStartButtons();
                     this.enableStopButtons();
                 })
@@ -429,7 +468,6 @@ class GaragePage {
         resetButton.addEventListener('click', (e) => {
             e.preventDefault();
             const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll('.car-item');
-           
             Array.from(cards).forEach((card) => {
                 const id = card.id;
                 controlEngine([{key: 'id', value: id}, {key: 'status', value: 'stopped'}])

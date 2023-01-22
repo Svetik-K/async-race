@@ -53,3 +53,8 @@ td {
     cursor: pointer;
     text-transform: uppercase;
 }
+
+.icon svg{
+    width: 60px;
+    height: 20px;
+}
