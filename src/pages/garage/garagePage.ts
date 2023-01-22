@@ -1,6 +1,6 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
-import { createRandomColor, createCarName} from '../../utils/helpers';
+import { createRandomColor, createCarName, raceAll} from '../../utils/helpers';
 import { createCar, getCar, getCars, deleteCar, patchCar, controlEngine, deleteWinner, driveEngine } from '../../utils/api';
 import './garage.css';
 
@@ -139,7 +139,7 @@ class GaragePage {
     }
 
     private animateCar(data: CarData, id: number) {
-        const duration = data.distance / data.velocity;
+        const duration = Math.floor(data.distance / data.velocity);
         const carCard = <HTMLDivElement>document.getElementById(`${id}`);
         const carImage = <HTMLDivElement>carCard.lastChild;
                     
@@ -178,6 +178,55 @@ class GaragePage {
             carImage.style.transform = `translateX(0px)`;
         })
         .catch((error) => console.log(error));
+    }
+
+    private disableStartButtons() {
+        const startButtons: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.button_start');
+        startButtons.forEach((button) => {
+            button.classList.remove('active');
+            button.classList.add('inactive');
+            button.disabled = true; 
+        })
+    }
+
+    private enableStartButtons() {
+        const startButtons: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.button_start');
+        startButtons.forEach((button) => {
+            button.classList.remove('inactive');
+            button.classList.add('active');
+            button.disabled = false; 
+        })
+    }
+
+    private enableStopButtons() {
+        const stopButtons: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.button_stop');
+        stopButtons.forEach((button) => {
+            button.classList.remove('inactive');
+            button.classList.add('active');
+            button.disabled = false; 
+        })
+    }
+
+    private disableStopButtons() {
+        const stopButtons: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.button_stop');
+        stopButtons.forEach((button) => {
+            button.classList.remove('active');
+            button.classList.add('inactive');
+            button.disabled = true; 
+        })
+    }
+
+    public async getStartPromises() {
+        const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll('.car-item');
+        const promises: Promise<CarData>[] = [];
+        Array.from(cards).forEach((card) => {
+            const id = card.id;
+            const promise = controlEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}]);
+            console.log(promise)
+            promises.push(promise)
+        });
+        const result = await Promise.all(promises);
+        return result;
     }
 
     draw() {
@@ -354,7 +403,6 @@ class GaragePage {
                 })
                 .catch((error) => console.log(error.message));
             }
-
             if(target.classList.contains('button_stop')) {
                 this.stopCar(Number(id));
             }
@@ -364,15 +412,17 @@ class GaragePage {
         raceButton.addEventListener('click', (e) => {
             e.preventDefault();
             const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll('.car-item');
-      
-            Array.from(cards).forEach((card) => {
-                const id = card.id;
-                controlEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}])
-                .then((data: CarData) => {
-                    this.animateCar(data, Number(id));
+            const ids = Array.from(cards).map((card) => card.id);
+
+            this.getStartPromises().then((res) => {
+                res.forEach((item, index) => {
+                    this.animateCar(item, Number(ids[index]));
+                    this.driveCar(Number(ids[index]));
+                    this.disableStartButtons();
+                    this.enableStopButtons();
                 })
-                .catch((error) => console.log(error.message));
-            });
+            })
+            .catch((error) => console.log(error));   
         })
 
         // reset
@@ -385,7 +435,10 @@ class GaragePage {
                 controlEngine([{key: 'id', value: id}, {key: 'status', value: 'stopped'}])
                 .then(() => {
                     this.stopCar(Number(id));
+                    this.disableStopButtons();
+                    this.enableStartButtons();
                 })
+                .catch((error) => console.log(error.message));
             })
         })
 

@@ -123,9 +123,10 @@ export const driveEngine = async(queryParams: Param[] = []) => {
 // get all winners
 export const getWinners = async(queryParams: Param[] = []) => {
     const response = await fetch(`${mainUrl}${paths.winners}${generateQueryParams(queryParams)}`);
-    return {
-        // items: await Promise.all(items.map)
-    }
+    const winners = await response.json();
+    const count = Number(response.headers.get('X-Total-Count'));
+
+    return { winners, count }
 }
 
 export const getWinner = async(id: number) => {
