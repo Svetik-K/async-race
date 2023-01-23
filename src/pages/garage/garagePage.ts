@@ -1,7 +1,7 @@
 import Header from '../../components/header/header';
 import Car from '../../components/car/car';
-import { createRandomColor, createCarName, raceAll} from '../../utils/helpers';
-import { createCar, getCar, getCars, deleteCar, patchCar, controlEngine, deleteWinner, driveEngine, saveWinner} from '../../utils/api';
+import { createRandomColor, createCarName } from '../../utils/helpers';
+import { createCar, getCar, getCars, deleteCar, patchCar, controlEngine, deleteWinner, driveEngine, saveWinner } from '../../utils/api';
 import './garage.css';
 
 type CarData = {
@@ -80,7 +80,7 @@ class GaragePage {
         this.fetchGarageCars(String(pageToDraw));
     }
     
-    private addOneCar() {
+    private async addOneCar() {
         const nameInput = <HTMLInputElement>document.querySelector('.create__name');
         const carName = nameInput.value;
         const colorInput = <HTMLInputElement>document.querySelector('.create__color');
@@ -91,7 +91,7 @@ class GaragePage {
             return;
         }
         const car: Car = new Car(carName, carColor);
-        createCar(car)
+        await createCar(car)
         .then(() => {
             const currentPage = <HTMLSpanElement>document.querySelector('.garage__page-number');
             this.fetchGarageCars(`${currentPage.textContent}`);
@@ -115,8 +115,8 @@ class GaragePage {
         carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) + 100})`;
     }
 
-    private fetchGarageCars(page: string) {
-        getCars([{key: '_page', value: `${page}`}, {key: '_limit', value: '7'}])
+    private async fetchGarageCars(page: string) {
+        await getCars([{key: '_page', value: `${page}`}, {key: '_limit', value: '7'}])
         .then((data) => {
             this.cars.innerHTML = '';
             data.cars.forEach((car: Car) => {
@@ -129,8 +129,8 @@ class GaragePage {
         .catch((error) => console.log(error.message));
     }
 
-    private getNumberCarsInGarage() {
-        getCars()
+    private async getNumberCarsInGarage() {
+        await getCars()
         .then((data) => {
             const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
             carsNumber.textContent = `(${data.cars.length})`;
@@ -158,8 +158,28 @@ class GaragePage {
         this.moveId = requestAnimationFrame(move);     
     }
 
-    private driveCar(id: number) {
-        driveEngine([{key: 'id', value: id}, {key: 'status', value: 'drive'}])
+    private disableStopButtons() {
+        const stopButtons: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.button_stop');
+        stopButtons.forEach((button) => {
+            button.classList.remove('active');
+            button.classList.add('inactive');
+            button.disabled = true; 
+        })
+    }
+
+    public async getStartPromises(cards: NodeListOf<HTMLDivElement>) {
+        const promises: Promise<CarData>[] = [];
+        Array.from(cards).forEach((card) => {
+            const id = card.id;
+            const promise: Promise<CarData> = controlEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}]);
+            promises.push(promise)
+        });
+        const result = await Promise.all(promises);
+        return result;
+    }
+
+    private async driveCar(id: number) {
+        await driveEngine([{key: 'id', value: id}, {key: 'status', value: 'drive'}])
         .then((status) => {
             if(status === 500) {
                 cancelAnimationFrame(this.moveId);
@@ -169,10 +189,10 @@ class GaragePage {
         .catch((error) => console.log(error.message));
     }
 
-    private stopCar(id: number) {
+    private async stopCar(id: number) {
         const carCard = <HTMLDivElement>document.getElementById(`${id}`);
         const carImage = <HTMLDivElement>carCard.lastChild;
-        controlEngine([{key: 'id', value: id}, {key: 'status', value: 'stopped'}])
+        await controlEngine([{key: 'id', value: id}, {key: 'status', value: 'stopped'}])
         .then(() => {
             cancelAnimationFrame(this.moveId);
             carImage.style.transform = `translateX(0px)`;
@@ -207,30 +227,9 @@ class GaragePage {
         })
     }
 
-    private disableStopButtons() {
-        const stopButtons: NodeListOf<HTMLButtonElement> = document.querySelectorAll('.button_stop');
-        stopButtons.forEach((button) => {
-            button.classList.remove('active');
-            button.classList.add('inactive');
-            button.disabled = true; 
-        })
-    }
-
-    public async getStartPromises(cards: NodeListOf<HTMLDivElement>) {
-        const promises: Promise<CarData>[] = [];
-        Array.from(cards).forEach((card) => {
-            const id = card.id;
-            const promise = controlEngine([{key: 'id', value: id}, {key: 'status', value: 'started'}]);
-            promises.push(promise)
-        });
-        const result = await Promise.all(promises);
-        return result;
-    }
-
     private showWinner(time: number, name: string) {
         const winnerWrapper = document.createElement('div');
         winnerWrapper.className = 'winner__wrapper';
-        winnerWrapper.style.display = 'flex';
 
         const winner = document.createElement('div');
         winner.className = 'winner';
@@ -367,7 +366,7 @@ class GaragePage {
                     this.fetchGarageCars(`${currentPage.textContent}`);
                     const carsNumber = <HTMLSpanElement>document.querySelector('.garage__number');
                     carsNumber.textContent = `(${Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1)) - 1})`;
-                    // deleteWinner(Number(id)); 
+                    deleteWinner(Number(id)); 
                 })
                 .catch((error) => console.log(error.message)); 
             } 
@@ -431,37 +430,41 @@ class GaragePage {
             e.preventDefault();
             const cards: NodeListOf<HTMLDivElement> = document.querySelectorAll('.car-item');
             const ids = Array.from(cards).map((card) => card.id);
-            this.getStartPromises(cards).then((res) => {
-                const times = res.map((el) => el.distance / el.velocity);
-                const minTime = Math.min(...times);
-                res.forEach((item, index) => {
+            this.getStartPromises(cards)
+            .then(data => {
+                let times = data.map((el) => el.distance / el.velocity);
+                data.forEach((item, index) => {
+                    let minTime = 0;
                     const itemId = ids[index];
+                    const carTime = item.distance / item.velocity;
                     const carNameHeading = <HTMLHeadingElement>cards[index].firstChild?.lastChild;
                     const carName = <string>carNameHeading.textContent;
-                    const carTime = item.distance / item.velocity;
                     this.animateCar(item, Number(itemId));
-                    driveEngine([{key: 'id', value: itemId}, {key: 'status', value: 'drive'}])
-                    .then((status) => {
-                        if(carTime === minTime && status === 200) {
-                            setTimeout(() => {
+                    driveEngine([{key: 'id', value: itemId}, {key: 'status', value: 'drive'}]).then(res => {
+                        if(res === 500) {
+                            minTime = Math.min(...times);
+                            if(carTime === minTime) {
+                                times = times.filter(el => el !== carTime);
+                            }
+                            cancelAnimationFrame(this.moveId);
+                            controlEngine([{key: 'id', value: itemId}, {key: 'status', value: 'stopped'}]);   
+                        }
+     
+                        if(res === 200) {
+                            minTime = Math.min(...times);
+                            if(carTime === minTime) {
                                 const time = (carTime / 1000).toFixed(2);
                                 this.showWinner(carTime, carName);
-                                saveWinner(Number(itemId), Number(time));   
-                            }, 0);
-                        }
-                        if(status === 500) {
-                            cancelAnimationFrame(this.moveId);
-                            controlEngine([{key: 'id', value: itemId}, {key: 'status', value: 'stopped'}])
-                        }
-  
-                    })
-                    .catch((error) => console.log(error.message));
+                                saveWinner(Number(itemId), Number(time));
+                            }   
+                        } 
+                    });
 
                     this.disableStartButtons();
                     this.enableStopButtons();
                 })
             })
-            .catch((error) => console.log(error));   
+            .catch((error) => console.log(error.message));   
         })
 
         // reset
@@ -485,5 +488,4 @@ class GaragePage {
 }
 
 export default GaragePage;
-
-
+        

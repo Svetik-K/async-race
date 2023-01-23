@@ -14,12 +14,3 @@ export function createCarName() {
     const randomName = `${firstNames[Math.floor(Math.random() * 20)]} ${secondName[Math.floor(Math.random() * 20)]}`;
     return randomName;
 }
-
-export const raceAll = async(promises: any[], ids: string[]) => {
-    const result = await Promise.race(promises);
-    console.log(result)
-
-    if(!result.success) {
-        const failed = ids.findIndex(index => index === result.id);
-    }
-}

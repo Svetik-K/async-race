@@ -8,10 +8,10 @@ type Winner = {
     time: number
 }
 
-type CarItem = {
+type Car = {
     name: string,
     color: string,
-    id: number
+    id?: number
 }
 
 class WinnersPage {
@@ -80,6 +80,11 @@ class WinnersPage {
         paginationButtons.append(nextButton);
 
         nextButton.addEventListener('click', (e) => {
+            const carsNumber = <HTMLSpanElement>document.querySelector('.winners__number');
+            const numberCars = Number(carsNumber.textContent?.slice(1, carsNumber.textContent.length - 1));
+            if(numberCars <= 10) {
+                return;
+            }
             e.preventDefault();
             this.drawNextPage();
         })
@@ -91,19 +96,41 @@ class WinnersPage {
     }
 
     private drawNextPage() {
-
+        const currentPage = <HTMLSpanElement>document.querySelector('.winners__page-number');
+        const buttonPrev = <HTMLButtonElement>document.querySelector('.button_prev');
+        const pageToDraw = Number(currentPage.textContent) + 1;
+        if(buttonPrev.classList.contains('inactive')) {
+            buttonPrev.classList.remove('inactive');
+            buttonPrev.classList.add('active');
+            buttonPrev.disabled = false;
+        }
+        this.fetchWinners(Number(pageToDraw));
     }
 
     private drawPreviousPage() {
-
+        const currentPage = <HTMLSpanElement>document.querySelector('.winners__page-number');
+        const buttonPrev = <HTMLButtonElement>document.querySelector('.button_prev');
+        if(currentPage.textContent === '2') {
+            buttonPrev.classList.remove('active');
+            buttonPrev.classList.add('inactive');
+            buttonPrev.disabled = true;
+        }
+        const pageToDraw = Number(currentPage.textContent) - 1;
+        this.fetchWinners(Number(pageToDraw));
     }
 
-    private fetchWinners(page: number) {
-        getWinners([{key: '_page', value: `${page}`}, {key: '_limit', value: '10'}]).then((data) => {
-            let counter: number = 1;
+    private async fetchWinners(page: number) {
+        await getWinners([{key: '_page', value: `${page}`}, {key: '_limit', value: '10'}]).then((data) => {
+            let counter: number;
+            if(page === 1) {
+                counter = 1;
+            } else {
+                counter = (page - 1) * 10 + 1;
+            }
+            
             this.tbody.innerHTML = '';
             data.winners.forEach((winner: Winner) => {
-                getCar(winner.id).then((car: CarItem) => {
+                getCar(winner.id).then((car) => {
                     const row = document.createElement('tr');
                     const number = document.createElement('td');
                     row.append(number);
@@ -225,6 +252,8 @@ class WinnersPage {
                     counter += 1;
                 });    
             })
+            const curPage = <HTMLSpanElement>document.querySelector('.winners__page-number');
+            curPage.textContent = `${page}`;
             const winnersNumber = <HTMLSpanElement>document.querySelector('.winners__number');
             winnersNumber.textContent = `(${data.count})`;
         });
