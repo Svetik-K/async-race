@@ -1,0 +1,60 @@
+.winners {
+    padding-left: 20px;
+}
+
+.winners__counter {
+    display: flex;
+    margin-bottom: 10px;
+    gap: 5px;
+}
+
+.winners__number {
+    font-size: 20px;
+}
+
+.win-page__counter {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.winners__page-number {
+    font-size: 14px;
+}
+
+.winners__table {
+    margin-bottom: 40px;
+}
+
+th {
+    padding: 5px 10px;
+    text-align: left;
+    background-color: chartreuse;
+    color: #000000;
+    font-size: 16px;
+}
+
+td {
+    padding: 5px 10px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.win-pagination {
+    margin-top: 20px;
+}
+
+.win-pagination__button {
+    border: 2px solid chartreuse;
+    background-color: transparent;
+    color: chartreuse;
+    font-size: 12px;
+    margin-right: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.icon svg{
+    width: 60px;
+    height: 20px;
+}

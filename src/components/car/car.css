@@ -1,0 +1,68 @@
+.car-item {
+    width: 100%;
+    border-bottom: 2px dashed #FFFFFF;
+    padding-top: 10px;
+    background: url('../../assets/svg/finish.png');
+    background-repeat: no-repeat;
+    background-position: right 100px bottom;
+    background-size: 60px;
+}
+
+.controls__button {
+    width: 80px;
+    height: 20px;
+    border: 2px solid #FFFFFF;
+    background-color: transparent;
+    color: #FFFFFF;
+    font-size: 12px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.button_remove {
+    border: 2px solid #FE8484;
+    background-color: transparent;
+    color: #FE8484;
+}
+
+.controls {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.controls__car-name {
+    font-size: 16px;
+    margin-left: 20px;
+    color: #FFDF00;
+}
+
+.car-item__image {
+    width: 150px;
+    height: 40px;
+}
+
+.car-item__image svg{
+    width: 150px;
+    height: 40px;
+}
+
+.animation__button {
+    height: 20px;
+    border: 2px solid #FFFFFF;
+    background-color: transparent;
+    color: #FFFFFF;
+    font-size: 12px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.active {
+    border: 2px solid #3ED715;
+    background-color: transparent;
+    color: #3ED715;
+}
+
+.inactive {
+    opacity: 0.1;
+}

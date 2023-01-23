@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "lib": ["dom", "ES2021.Promise"],
+    "allowSyntheticDefaultImports": true,
+    "noImplicitAny": true,
+    "strict": true,
+    "module": "es6",
+    "target": "es5",
+    "allowJs": true,
+    "outDir": "./dist/",
+  },
+  "files": ["src/index.ts"]
+}

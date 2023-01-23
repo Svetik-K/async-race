@@ -1,0 +1,134 @@
+.garage {
+    width: 100%;
+    padding-left: 20px;
+}
+
+.create,
+.update {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.blocked {
+    pointer-events: none;
+}
+
+.create__button,
+.update__button {
+    width: 80px;
+    height: 20px;
+    border: 2px solid #FFFFFF;
+    background-color: transparent;
+    color: #FFFFFF;
+    font-size: 12px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+input[type='text'] {
+    outline: none;
+    margin-right: 10px;
+}
+
+input[type='color'] {
+    width: 80px;
+    height: 20px;
+    margin-right: 10px;
+}
+.garage__buttons {
+    margin-top: 20px;
+}
+
+.garage__button {
+    border: 2px solid #FFFFFF;
+    background-color: transparent;
+    color: #FFFFFF;
+    font-size: 12px;
+    margin-right: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-bottom: 50px;
+    transition: 0.3s;
+}
+
+.garage__button:hover {
+    border: 2px solid #3ED715;
+    color: #3ED715;
+}
+
+.button_race,
+.button_reset {
+    width: 90px;
+    height: 30px;
+}
+
+.button_generate {
+    width: 150px;
+    height: 30px;
+}
+
+.garage__counter {
+    display: flex;
+    margin-bottom: 10px;
+    gap: 5px;
+}
+
+.garage__number {
+    font-size: 20px;
+}
+
+.page__counter {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.garage__page-number {
+    font-size: 14px;
+}
+
+.pagination {
+    padding: 20px 0;
+}
+
+.pagination__button {
+    border: 2px solid #FFFFFF;
+    background-color: transparent;
+    color: #FFFFFF;
+    font-size: 12px;
+    margin-right: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+}
+
+.active {
+    border: 2px solid #3ED715;
+    background-color: transparent;
+    color: #3ED715;
+}
+
+.inactive {
+    opacity: 0.1;
+}
+
+.winner__wrapper {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.winner {
+    width: 90%;
+    height: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: transparent;
+    font-size: 42px;
+    font-weight: bold;
+    color: #3ED715;
+}

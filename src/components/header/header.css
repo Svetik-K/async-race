@@ -1,0 +1,28 @@
+.header {
+    width: 100%;
+    display: flex;
+    padding: 30px 20px;
+}
+
+.header__button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 120px;
+    height: 30px;
+    text-decoration: none;
+    border: 2px solid #FFFFFF;
+    color: #FFFFFF;
+    margin-right: 20px;
+    font-size: 14px;
+}
+
+.button_garage {
+    border: 2px solid #f60b8a;
+    color: #f60b8a;
+}
+
+.button_winners {
+    border: 2px solid #E56717;
+    color: #E56717;
+}
